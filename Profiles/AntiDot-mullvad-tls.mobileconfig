@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>TLS</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>194.242.2.2</string>
+					<string>2a07:e340::2</string>
+				</array>
+				<key>ServerName</key>
+				<string>dns.mullvad.net</string>
+			</dict>
+			<key>PayloadDisplayName</key>
+			<string>AntiDot Mullvad DoT</string>
+			<key>PayloadIdentifier</key>
+			<string>org.antidot.profile.mullvad-tls.dns</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>FB97AB76-AB9B-5A09-9DA5-BA2900CFA35A</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Tüm DNS sorgularını Mullvad DoT ile şifreler.</string>
+	<key>PayloadDisplayName</key>
+	<string>AntiDot – Mullvad (DoT)</string>
+	<key>PayloadIdentifier</key>
+	<string>org.antidot.profile.mullvad-tls</string>
+	<key>PayloadOrganization</key>
+	<string>AntiDot (Apache-2.0)</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>BA6B31D4-BF86-5ED4-8377-37D4BA5662F4</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>1.1.1.1</string>
+					<string>1.0.0.1</string>
+					<string>2606:4700:4700::1111</string>
+					<string>2606:4700:4700::1001</string>
+				</array>
+				<key>ServerURL</key>
+				<string>https://cloudflare-dns.com/dns-query</string>
+			</dict>
+			<key>PayloadDisplayName</key>
+			<string>AntiDot Cloudflare DoH</string>
+			<key>PayloadIdentifier</key>
+			<string>org.antidot.profile.cloudflare-https.dns</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>12DFDF20-74BA-5B81-9E8A-A6E3E49B2899</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Tüm DNS sorgularını Cloudflare DoH ile şifreler.</string>
+	<key>PayloadDisplayName</key>
+	<string>AntiDot – Cloudflare (DoH)</string>
+	<key>PayloadIdentifier</key>
+	<string>org.antidot.profile.cloudflare-https</string>
+	<key>PayloadOrganization</key>
+	<string>AntiDot (Apache-2.0)</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>5FD4416C-1C80-59A8-AA4B-156B3D592CA4</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

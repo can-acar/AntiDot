@@ -36,25 +36,61 @@ herkesin kolayca atlatabilmesidir.
 çözmek için düz DNS'e başvurmak yerine doğrudan bu IP'lere bağlanır ve TLS sertifikasını
 sunucu adına göre doğrular. Böylece ilk adımda da manipülasyon yapılamaz.
 
-## Kurulum (geliştirici)
+## iPhone'a kurulum
 
-Gereksinimler: macOS, Xcode 15+, iOS 15+ cihaz, [XcodeGen](https://github.com/yonaskolb/XcodeGen).
+Üç yol var. Hangisinin size uyduğu Apple hesabınıza bağlı.
+
+### Yol 1: Uygulamasız, ücretsiz (DNS profili)
+
+Uygulamayı kurmadan aynı korumayı hemen almak için hazır profillerden birini yükleyin:
+
+1. iPhone'da **Safari** ile bu reponun [`Profiles/`](Profiles) klasörünü açın.
+2. Bir profil seçin (ör. `AntiDot-cloudflare-https.mobileconfig`), **Raw** / **İndir**'e dokunun, **İzin Ver** deyin.
+3. **Ayarlar › Profil İndirildi › Yükle**.
+4. **Ayarlar › Genel › VPN ve Aygıt Yönetimi › DNS** bölümünde profilin seçili olduğunu kontrol edin.
+
+Profiller imzasız olduğu için iOS "Doğrulanmadı" uyarısı gösterir; bu normaldir.
+İçerikleri düz metin XML'dir, `scripts/generate_profiles.py` ile yeniden üretilebilir.
+Kaldırmak için: Ayarlar › Genel › VPN ve Aygıt Yönetimi › profil › Profili Sil.
+
+### Yol 2: Xcode ile doğrudan iPhone'a (ücretli Developer hesabı)
+
+Gereksinimler: Mac, Xcode 15+, iOS 15+ iPhone, [Apple Developer Program](https://developer.apple.com/programs/) üyeliği
+(Network Extension yeteneği ücretsiz kişisel hesapla imzalanamaz), [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
 ```bash
 brew install xcodegen
+git clone https://github.com/can-acar/AntiDot.git && cd AntiDot
 xcodegen generate
 open AntiDot.xcodeproj
 ```
 
-1. Xcode > AntiDot hedefi > *Signing & Capabilities*: kendi Team'inizi seçin
-   (veya `project.yml` içindeki `DEVELOPMENT_TEAM` değerini doldurun).
-2. `PRODUCT_BUNDLE_IDENTIFIER` değerini kendinize ait bir kimlikle değiştirin.
-3. *Network Extensions* yeteneğinde **DNS Settings** işaretli olmalı
-   (`AntiDot.entitlements` içinde `dns-settings` zaten tanımlı).
-4. Gerçek cihazda çalıştırın, **Şifreli DNS'i kur**'a dokunun.
-5. **Ayarlar › Genel › VPN ve Aygıt Yönetimi › DNS** bölümünden **AntiDot**'u seçin.
+1. Xcode › Settings › Accounts: Apple ID'nizi ekleyin.
+2. AntiDot hedefi › **Signing & Capabilities**: *Automatically manage signing* açık, **Team** olarak ücretli takımınızı seçin.
+   Kalıcı yapmak için `project.yml` içindeki `DEVELOPMENT_TEAM` değerine Team ID'nizi yazın.
+3. Bundle ID başkasına aitse `PRODUCT_BUNDLE_IDENTIFIER`'ı kendinize ait bir değerle değiştirin (ör. `com.adiniz.antidot`).
+4. Aynı sekmede **Network Extensions › DNS Settings** işaretli görünmeli (entitlement dosyada tanımlı;
+   Xcode App ID'yi bu yetenekle otomatik oluşturur).
+5. iPhone'u kabloyla bağlayın, cihazda **Ayarlar › Gizlilik ve Güvenlik › Geliştirici Modu**'nu açın (iOS 16+), yeniden başlatın.
+6. Xcode'da hedef cihaz olarak iPhone'u seçip ▶︎ (Cmd+R).
+7. Uygulamada **Şifreli DNS'i kur**, ardından **Ayarlar › Genel › VPN ve Aygıt Yönetimi › DNS › AntiDot**.
 
-Testler: `xcodebuild test -project AntiDot.xcodeproj -scheme AntiDot -destination 'platform=iOS Simulator,name=iPhone 16' CODE_SIGNING_ALLOWED=NO`
+### Yol 3: TestFlight / App Store (başkalarıyla paylaşmak için)
+
+1. Yol 2'deki imzalama adımlarını tamamlayın.
+2. [App Store Connect](https://appstoreconnect.apple.com)'te aynı Bundle ID ile bir uygulama kaydı oluşturun.
+3. Xcode'da hedef olarak *Any iOS Device* seçin › **Product › Archive** › **Distribute App › TestFlight & App Store**.
+4. App Store Connect › TestFlight'ta test kullanıcılarını (veya herkese açık bağlantıyı) ekleyin.
+
+Şifreleme beyanı `ITSAppUsesNonExemptEncryption = NO` olarak ayarlı (yalnızca işletim sisteminin standart
+HTTPS/TLS'i kullanılıyor), bu yüzden yükleme sırasında ek ihracat belgesi istenmez.
+
+### Testler
+
+```bash
+xcodebuild test -project AntiDot.xcodeproj -scheme AntiDot \
+  -destination 'platform=iOS Simulator,name=iPhone 16' CODE_SIGNING_ALLOWED=NO
+```
 
 ## iOS kısıtları ve bilinmesi gerekenler
 
@@ -75,7 +111,7 @@ Testler: `xcodebuild test -project AntiDot.xcodeproj -scheme AntiDot -destinatio
 
 - Packet Tunnel tabanlı mod (DNS + basit engelleme listeleri)
 - Oturum açılışında sunucu gecikme testi ve otomatik en hızlı sunucu seçimi
-- `.mobileconfig` profil dışa aktarma (MDM / uygulamasız kullanım)
+- Uygulama içinden özel sunucu için `.mobileconfig` dışa aktarma
 - İngilizce yerelleştirme
 
 ## Katkı
