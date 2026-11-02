@@ -11,8 +11,8 @@ settings:
     SWIFT_VERSION: "5.9"
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
-    # Kendi Apple Developer Team ID'nizi girin (Xcode > Signing & Capabilities).
-    DEVELOPMENT_TEAM: ""
+    # Apple Developer Team ID (Xcode > Signing & Capabilities). Fork'larda kendinizinkiyle değiştirin.
+    DEVELOPMENT_TEAM: "6Z7VX56BQX"
     CODE_SIGN_STYLE: Automatic
 targets:
   AntiDot:
@@ -35,6 +35,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.canacar.antidot
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
   AntiDotTests:
     type: bundle.unit-test
     platform: iOS

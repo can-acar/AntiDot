@@ -15,6 +15,20 @@ enum DNSTransport: String, Codable, CaseIterable, Identifiable {
         case .dot: return "DoT (TLS)"
         }
     }
+
+    var shortTitle: String {
+        switch self {
+        case .doh: return "DoH"
+        case .dot: return "DoT"
+        }
+    }
+
+    var port: Int {
+        switch self {
+        case .doh: return 443
+        case .dot: return 853
+        }
+    }
 }
 
 /// Bir şifreli DNS sunucusunun tanımı.

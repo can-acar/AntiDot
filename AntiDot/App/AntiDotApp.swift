@@ -17,14 +17,20 @@ struct AntiDotApp: App {
 }
 
 struct RootView: View {
+    @AppStorage("antidot.onboarded") private var onboarded = false
+
     var body: some View {
         TabView {
             ProtectionView()
-                .tabItem { Label("Koruma", systemImage: "lock.shield") }
-            ResolverListView()
+                .tabItem { Label("Koruma", systemImage: "lock.shield.fill") }
+            NavigationView { ResolverListView() }
+                .navigationViewStyle(.stack)
                 .tabItem { Label("Sunucular", systemImage: "server.rack") }
             DiagnosticsView()
                 .tabItem { Label("Test", systemImage: "stethoscope") }
+        }
+        .fullScreenCover(isPresented: Binding(get: { !onboarded }, set: { onboarded = !$0 })) {
+            OnboardingView { onboarded = true }
         }
     }
 }

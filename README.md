@@ -30,11 +30,41 @@ herkesin kolayca atlatabilmesidir.
 | Saklama | `AntiDot/Models/ResolverStore.swift` | Özel sunucular ve seçim (`UserDefaults`) |
 | Test istemcisi | `AntiDot/Services/EncryptedDNSClient.swift` | Uygulama içinden RFC 8484 DoH (POST) ve RFC 7858 DoT sorgusu, sistem çözümleyicisiyle karşılaştırma |
 | DNS kodlama | `AntiDot/Services/DNSMessage.swift` | RFC 1035 sorgu üretimi ve cevap ayrıştırma (sıkıştırma işaretçileri dahil) |
-| Arayüz | `AntiDot/Views/*` | SwiftUI: Koruma, Sunucular, Test sekmeleri |
+| Arayüz | `AntiDot/Views/*` | SwiftUI: tanıtım, Koruma, Sunucular, Test sekmeleri; ortak tema `Theme.swift` |
 
 **Bootstrap koruması:** Her sunucu için IP adresleri de verilir. iOS, sunucunun adını
 çözmek için düz DNS'e başvurmak yerine doğrudan bu IP'lere bağlanır ve TLS sertifikasını
 sunucu adına göre doğrular. Böylece ilk adımda da manipülasyon yapılamaz.
+
+## iOS Simülatörde deneme (en hızlı yol)
+
+Gereksinimler: Mac, Xcode 16+ (bir iPhone simülatörü yüklü), [XcodeGen](https://github.com/yonaskolb/XcodeGen).
+
+```bash
+brew install xcodegen
+git clone https://github.com/can-acar/AntiDot.git && cd AntiDot
+xcodegen generate
+open AntiDot.xcodeproj
+```
+
+1. Xcode üst çubuğunda şema olarak **AntiDot**, hedef olarak bir simülatör seçin (ör. **iPhone 16 Pro**).
+2. ▶︎ (Cmd+R). Simülatör için cihaz kaydı veya provisioning profili gerekmez.
+3. İlk açılışta tanıtım ekranları gelir. Ardından:
+   - **Koruma**: *Korumayı başlat* → "Bir adım kaldı" kartında *Etkinleştirmeyi simüle et* → kalkan yeşile döner.
+   - **Sunucular**: sağ üstteki hız göstergesiyle tüm sunucuların gecikmesini ölçün, birini seçin.
+   - **DNS Testi**: bir alan adını ağın DNS'i ile şifreli sunucu arasında karşılaştırın (gerçek ağ sorgusu yapar).
+
+Simülatör sistem DNS ayarını uygulayamadığı için uygulama orada **demo modunda** çalışır
+(üstte mavi bir şerit görünür): kurulum/etkinleştirme/kaldırma adımları taklit edilir,
+gecikme ölçümü ve DNS testi ise gerçek DoH/DoT sorguları gönderir. Tanıtımı yeniden görmek için
+uygulamayı simülatörden silip tekrar çalıştırın.
+
+Komut satırından:
+
+```bash
+xcodebuild -project AntiDot.xcodeproj -scheme AntiDot \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' build
+```
 
 ## iPhone'a kurulum
 
@@ -66,8 +96,8 @@ open AntiDot.xcodeproj
 ```
 
 1. Xcode › Settings › Accounts: Apple ID'nizi ekleyin.
-2. AntiDot hedefi › **Signing & Capabilities**: *Automatically manage signing* açık, **Team** olarak ücretli takımınızı seçin.
-   Kalıcı yapmak için `project.yml` içindeki `DEVELOPMENT_TEAM` değerine Team ID'nizi yazın.
+2. AntiDot hedefi › **Signing & Capabilities**: *Automatically manage signing* açık olmalı. Team, `project.yml` içindeki
+   `DEVELOPMENT_TEAM` (`6Z7VX56BQX`) değerinden gelir; fork'larda kendi Team ID'nizi yazıp `xcodegen generate` çalıştırın.
 3. Bundle ID başkasına aitse `PRODUCT_BUNDLE_IDENTIFIER`'ı kendinize ait bir değerle değiştirin (ör. `com.adiniz.antidot`).
 4. Aynı sekmede **Network Extensions › DNS Settings** işaretli görünmeli (entitlement dosyada tanımlı;
    Xcode App ID'yi bu yetenekle otomatik oluşturur).
@@ -104,13 +134,13 @@ xcodebuild test -project AntiDot.xcodeproj -scheme AntiDot \
   aşmaz. Bunun için ECH destekli tarayıcı, VPN veya Tor gibi ek çözümler gerekir.
 - **Kaptif portallar** (otel/havalimanı Wi-Fi) bazen şifreli DNS ile açılmaz; iOS bu
   durumda geçici olarak ağın DNS'ine dönebilir.
-- **Simülatör** sistem DNS ayarını uygulamaz; bunu gerçek cihazda test edin.
-  DNS Testi sekmesi ise simülatörde de çalışır.
+- **Simülatör** sistem DNS ayarını uygulamaz; uygulama orada demo modunda çalışır.
+  Gerçek korumayı cihazda test edin. DNS Testi ve gecikme ölçümü simülatörde de gerçek sorgu yapar.
 
 ## Yol haritası (öneriler)
 
 - Packet Tunnel tabanlı mod (DNS + basit engelleme listeleri)
-- Oturum açılışında sunucu gecikme testi ve otomatik en hızlı sunucu seçimi
+- Otomatik en hızlı sunucu seçimi (gecikme ölçümü hazır)
 - Uygulama içinden özel sunucu için `.mobileconfig` dışa aktarma
 - İngilizce yerelleştirme
 
