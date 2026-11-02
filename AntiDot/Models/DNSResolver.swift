@@ -130,3 +130,7 @@ enum IPAddressValidator {
         return inet_pton(AF_INET, string, &v4) == 1 || inet_pton(AF_INET6, string, &v6) == 1
     }
 }
+
+enum PacketTunnelKeys {
+    static let resolvers = "resolvers"
+}

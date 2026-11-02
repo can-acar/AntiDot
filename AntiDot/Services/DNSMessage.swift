@@ -78,6 +78,13 @@ enum DNSMessage {
         return data
     }
 
+    static func emptyReply(to query: Data, flags: UInt8, rcode: UInt8) -> Data {
+        var b = [UInt8](query)
+        b[2] |= flags
+        b[3] = (b[3] & 0xF0) | rcode
+        return Data(b)
+    }
+
     static func encodeName(_ name: String) throws -> Data {
         let trimmed = name.hasSuffix(".") ? String(name.dropLast()) : name
         var out = Data()

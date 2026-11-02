@@ -5,6 +5,7 @@ import UIKit
 struct ProtectionView: View {
     @EnvironmentObject private var store: ResolverStore
     @EnvironmentObject private var dns: DNSSettingsService
+    @EnvironmentObject private var tunnel: TunnelService
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var latency: TimeInterval??
@@ -27,6 +28,8 @@ struct ProtectionView: View {
                     }
 
                     serverCard
+
+                    TunnelCard()
 
                     statsGrid
 
@@ -131,7 +134,7 @@ struct ProtectionView: View {
         .buttonStyle(PrimaryButtonStyle(colors: dns.state == .active
                                         ? [Theme.mint, Theme.teal]
                                         : [Theme.indigo, Theme.violet]))
-        .disabled(dns.isBusy || dns.state == .unknown)
+        .disabled(dns.isBusy || dns.state == .unknown || tunnel.isRunning)
     }
 
     private var primaryTitle: String {

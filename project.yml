@@ -29,17 +29,42 @@ targets:
     entitlements:
       path: AntiDot/AntiDot.entitlements
       properties:
-        com.apple.developer.networking.networkextension: [dns-settings]
+        com.apple.developer.networking.networkextension: [dns-settings, packet-tunnel-provider]
+    dependencies:
+      - target: AntiDotTunnel
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.canacar.antidot
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+  AntiDotTunnel:
+    type: app-extension
+    platform: iOS
+    sources:
+      - AntiDotTunnel
+      - AntiDot/Models/DNSResolver.swift
+      - AntiDot/Services/DNSMessage.swift
+      - AntiDot/Services/EncryptedDNSClient.swift
+    info:
+      path: AntiDotTunnel/Info.plist
+      properties:
+        CFBundleDisplayName: AntiDot Tünel
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.networkextension.packet-tunnel
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PacketTunnelProvider
+    entitlements:
+      path: AntiDotTunnel/AntiDotTunnel.entitlements
+      properties:
+        com.apple.developer.networking.networkextension: [packet-tunnel-provider]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.canacar.antidot.tunnel
+        TARGETED_DEVICE_FAMILY: "1"
   AntiDotTests:
     type: bundle.unit-test
     platform: iOS
-    sources: [AntiDotTests]
+    sources: [AntiDotTests, AntiDotTunnel/IPv4UDPPacket.swift]
     dependencies:
       - target: AntiDot
     settings:

@@ -66,3 +66,15 @@ final class DNSMessageTests: XCTestCase {
         }
     }
 }
+
+final class DNSEmptyReplyTests: XCTestCase {
+    func testServfailAndTruncatedKeepQuestionAndID() throws {
+        let query = try DNSMessage.makeQuery(name: "example.com", type: .a, id: 0xBEEF)
+        let servfail = DNSMessage.emptyReply(to: query, flags: 0x80, rcode: 2)
+        XCTAssertEqual(try DNSMessage.parseResponse(servfail, expectedID: 0xBEEF).rcode, 2)
+        XCTAssertEqual(servfail[2], 0x81)
+        let truncated = DNSMessage.emptyReply(to: query, flags: 0x82, rcode: 0)
+        XCTAssertEqual(truncated[2], 0x83)
+        XCTAssertEqual(truncated.count, query.count)
+    }
+}

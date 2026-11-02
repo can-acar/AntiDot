@@ -28,49 +28,56 @@ struct EncryptedDNSClient {
     }
 
     var timeout: TimeInterval = 8
+    var session: URLSession?
 
     func query(_ name: String, type: DNSRecordType, via resolver: DNSResolver) async throws -> Result {
         let started = Date()
-        let response: DNSResponse
-        switch resolver.transport {
-        case .doh: response = try await queryDoH(name, type: type, resolver: resolver)
-        case .dot: response = try await queryDoT(name, type: type, resolver: resolver)
-        }
+        let id: UInt16 = resolver.transport == .doh ? 0 : .random(in: 1...UInt16.max)
+        let raw = try await exchange(DNSMessage.makeQuery(name: name, type: type, id: id), via: resolver)
+        let response = try DNSMessage.parseResponse(raw, expectedID: id)
         return Result(response: response, latency: Date().timeIntervalSince(started))
+    }
+
+    func exchange(_ query: Data, via resolver: DNSResolver) async throws -> Data {
+        switch resolver.transport {
+        case .doh: return try await exchangeDoH(query, resolver: resolver)
+        case .dot: return try await exchangeDoT(query, resolver: resolver)
+        }
     }
 
     // MARK: DoH (RFC 8484, POST application/dns-message)
 
-    private func queryDoH(_ name: String, type: DNSRecordType, resolver: DNSResolver) async throws -> DNSResponse {
+    private func exchangeDoH(_ query: Data, resolver: DNSResolver) async throws -> Data {
         guard let s = resolver.dohURL, let url = URL(string: s) else { throw ClientError.missingEndpoint }
-        let query = try DNSMessage.makeQuery(name: name, type: type, id: 0)
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
         request.httpMethod = "POST"
         request.setValue("application/dns-message", forHTTPHeaderField: "Content-Type")
         request.setValue("application/dns-message", forHTTPHeaderField: "Accept")
         request.httpBody = query
 
-        let config = URLSessionConfiguration.ephemeral
-        config.urlCache = nil
-        let session = URLSession(configuration: config)
-        defer { session.finishTasksAndInvalidate() }
+        let session = self.session ?? Self.makeEphemeralSession()
+        defer { if self.session == nil { session.finishTasksAndInvalidate() } }
 
         let (data, response) = try await session.data(for: request)
         if let http = response as? HTTPURLResponse, http.statusCode != 200 {
             throw ClientError.badHTTPStatus(http.statusCode)
         }
-        return try DNSMessage.parseResponse(data, expectedID: 0)
+        return data
+    }
+
+    static func makeEphemeralSession() -> URLSession {
+        let config = URLSessionConfiguration.ephemeral
+        config.urlCache = nil
+        return URLSession(configuration: config)
     }
 
     // MARK: DoT (RFC 7858, TCP/853 + TLS, 2 bayt uzunluk önekli)
 
-    private func queryDoT(_ name: String, type: DNSRecordType, resolver: DNSResolver) async throws -> DNSResponse {
+    private func exchangeDoT(_ query: Data, resolver: DNSResolver) async throws -> Data {
         guard let serverName = resolver.dotServerName, let ip = resolver.bootstrapServers.first else {
             throw ClientError.missingEndpoint
         }
-        let id = UInt16.random(in: 1...UInt16.max)
         var framed = Data()
-        let query = try DNSMessage.makeQuery(name: name, type: type, id: id)
         framed.appendUInt16(UInt16(query.count))
         framed.append(query)
 
@@ -82,7 +89,7 @@ struct EncryptedDNSClient {
         let params = NWParameters(tls: tls, tcp: NWProtocolTCP.Options())
         let connection = NWConnection(host: NWEndpoint.Host(ip), port: 853, using: params)
 
-        let raw = try await withThrowingTaskGroup(of: Data.self) { group in
+        return try await withThrowingTaskGroup(of: Data.self) { group in
             group.addTask { try await Self.exchange(connection: connection, payload: framed) }
             group.addTask {
                 try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
@@ -94,10 +101,17 @@ struct EncryptedDNSClient {
             }
             return try await group.next()!
         }
-        return try DNSMessage.parseResponse(raw, expectedID: id)
     }
 
     private static func exchange(connection: NWConnection, payload: Data) async throws -> Data {
+        try await withTaskCancellationHandler {
+            try await startExchange(connection: connection, payload: payload)
+        } onCancel: {
+            connection.cancel()
+        }
+    }
+
+    private static func startExchange(connection: NWConnection, payload: Data) async throws -> Data {
         try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Data, Error>) in
             let once = ResumeOnce(cont)
             connection.stateUpdateHandler = { state in
@@ -116,6 +130,7 @@ struct EncryptedDNSClient {
                 }
             }
             connection.start(queue: .global(qos: .userInitiated))
+            if Task.isCancelled { connection.cancel() }
         }
     }
 

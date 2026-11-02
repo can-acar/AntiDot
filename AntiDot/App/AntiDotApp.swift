@@ -5,12 +5,14 @@ import SwiftUI
 struct AntiDotApp: App {
     @StateObject private var store = ResolverStore()
     @StateObject private var dnsService = DNSSettingsService()
+    @StateObject private var tunnel = TunnelService()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(store)
                 .environmentObject(dnsService)
+                .environmentObject(tunnel)
                 .task { await dnsService.refresh() }
         }
     }
