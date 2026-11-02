@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>TLS</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>94.140.14.14</string>
+					<string>94.140.15.15</string>
+					<string>2a10:50c0::ad1:ff</string>
+					<string>2a10:50c0::ad2:ff</string>
+				</array>
+				<key>ServerName</key>
+				<string>dns.adguard-dns.com</string>
+			</dict>
+			<key>PayloadDisplayName</key>
+			<string>AntiDot AdGuard DoT</string>
+			<key>PayloadIdentifier</key>
+			<string>org.antidot.profile.adguard-tls.dns</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>FBB383F3-EE61-5056-9211-40C61C3AE507</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Tüm DNS sorgularını AdGuard DoT ile şifreler.</string>
+	<key>PayloadDisplayName</key>
+	<string>AntiDot – AdGuard (DoT)</string>
+	<key>PayloadIdentifier</key>
+	<string>org.antidot.profile.adguard-tls</string>
+	<key>PayloadOrganization</key>
+	<string>AntiDot (Apache-2.0)</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>44B7C02B-2D66-58D9-8340-39D0D5BD03A0</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

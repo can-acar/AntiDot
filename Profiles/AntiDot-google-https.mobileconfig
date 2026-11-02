@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>8.8.8.8</string>
+					<string>8.8.4.4</string>
+					<string>2001:4860:4860::8888</string>
+					<string>2001:4860:4860::8844</string>
+				</array>
+				<key>ServerURL</key>
+				<string>https://dns.google/dns-query</string>
+			</dict>
+			<key>PayloadDisplayName</key>
+			<string>AntiDot Google DoH</string>
+			<key>PayloadIdentifier</key>
+			<string>org.antidot.profile.google-https.dns</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>78922ABF-2550-5EB1-B8C2-14163C101ACE</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Tüm DNS sorgularını Google DoH ile şifreler.</string>
+	<key>PayloadDisplayName</key>
+	<string>AntiDot – Google (DoH)</string>
+	<key>PayloadIdentifier</key>
+	<string>org.antidot.profile.google-https</string>
+	<key>PayloadOrganization</key>
+	<string>AntiDot (Apache-2.0)</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>CA7FEADC-403C-5297-A573-5357F4BC9977</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

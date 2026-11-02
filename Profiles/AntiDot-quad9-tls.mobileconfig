@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>TLS</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>9.9.9.9</string>
+					<string>149.112.112.112</string>
+					<string>2620:fe::fe</string>
+					<string>2620:fe::9</string>
+				</array>
+				<key>ServerName</key>
+				<string>dns.quad9.net</string>
+			</dict>
+			<key>PayloadDisplayName</key>
+			<string>AntiDot Quad9 DoT</string>
+			<key>PayloadIdentifier</key>
+			<string>org.antidot.profile.quad9-tls.dns</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>0057C83E-D58E-56CB-9BC7-79A71DEC790F</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Tüm DNS sorgularını Quad9 DoT ile şifreler.</string>
+	<key>PayloadDisplayName</key>
+	<string>AntiDot – Quad9 (DoT)</string>
+	<key>PayloadIdentifier</key>
+	<string>org.antidot.profile.quad9-tls</string>
+	<key>PayloadOrganization</key>
+	<string>AntiDot (Apache-2.0)</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>55B7AC62-43C5-58DB-93C4-5D453AC3CD81</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>
