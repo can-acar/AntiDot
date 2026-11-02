@@ -5,12 +5,19 @@ struct ResolverListView: View {
     @EnvironmentObject private var store: ResolverStore
     @EnvironmentObject private var dns: DNSSettingsService
     @State private var editing: DNSResolver?
+    @State private var latencies: [String: TimeInterval?] = [:]
+    @State private var probing = false
 
     var body: some View {
         List {
-            Section("Hazır sunucular") {
+            Section {
                 ForEach(DNSResolver.presets) { row($0) }
+            } header: {
+                Text("Hazır sunucular")
+            } footer: {
+                Text("DoH (HTTPS) çoğu ağda en iyi çalışır, çünkü normal web trafiğinden ayırt edilmesi zordur. DoT (TLS) 853 portunu kullanır ve bazı ağlarda engellenebilir.")
             }
+
             Section {
                 ForEach(store.customResolvers) { resolver in
                     row(resolver)
@@ -21,13 +28,24 @@ struct ResolverListView: View {
                             Button { editing = resolver } label: {
                                 Label("Düzenle", systemImage: "pencil")
                             }
+                            .tint(Theme.indigo)
                         }
                 }
                 Button {
                     editing = DNSResolver(name: "", transport: .doh, dohURL: "https://",
                                           dotServerName: nil, bootstrapServers: [])
                 } label: {
-                    Label("Özel sunucu ekle", systemImage: "plus")
+                    HStack(spacing: 14) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [4]))
+                                .foregroundColor(.accentColor)
+                            Image(systemName: "plus").font(.headline)
+                        }
+                        .frame(width: 42, height: 42)
+                        Text("Özel sunucu ekle").font(.body.weight(.semibold))
+                    }
+                    .padding(.vertical, 4)
                 }
             } header: {
                 Text("Özel sunucular")
@@ -35,7 +53,22 @@ struct ResolverListView: View {
                 Text("Seçim değiştiğinde sistem ayarı otomatik güncellenir (kuruluysa).")
             }
         }
+        .listStyle(.insetGrouped)
         .navigationTitle("Sunucular")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    Task { await probeAll() }
+                } label: {
+                    if probing {
+                        ProgressView()
+                    } else {
+                        Label("Hız testi", systemImage: "speedometer")
+                    }
+                }
+                .disabled(probing)
+            }
+        }
         .sheet(item: $editing) { resolver in
             ResolverEditView(resolver: resolver) { saved in
                 if store.customResolvers.contains(where: { $0.id == saved.id }) {
@@ -48,23 +81,58 @@ struct ResolverListView: View {
     }
 
     private func row(_ resolver: DNSResolver) -> some View {
-        Button {
-            store.selectedKey = resolver.selectionKey
-            if dns.state != .notInstalled && dns.state != .unknown {
+        let isSelected = resolver.selectionKey == store.selectedKey
+        return Button {
+            Theme.haptic(.light)
+            withAnimation(.easeInOut(duration: 0.2)) { store.selectedKey = resolver.selectionKey }
+            if dns.isInstalled {
                 Task { await dns.install(resolver) }
             }
         } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(resolver.name) · \(resolver.transport.title)").foregroundColor(.primary)
-                    Text(resolver.endpointDescription).font(.caption).foregroundColor(.secondary)
+            HStack(spacing: 14) {
+                ProviderBadge(resolver: resolver)
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text(resolver.name)
+                            .font(.body.weight(.semibold))
+                            .foregroundColor(.primary)
+                        TransportChip(transport: resolver.transport)
+                    }
+                    Text(resolver.isBuiltIn ? resolver.tagline : resolver.endpointDescription)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
                 }
-                Spacer()
-                if resolver.selectionKey == store.selectedKey {
-                    Image(systemName: "checkmark").foregroundColor(.accentColor)
+                Spacer(minLength: 4)
+                if let measured = latencies[resolver.selectionKey] {
+                    LatencyBadge(latency: measured)
                 }
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundColor(isSelected ? .accentColor : Color(.tertiaryLabel))
+            }
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// Tüm sunuculara aynı anda küçük bir sorgu gönderip gecikmeleri gösterir.
+    private func probeAll() async {
+        probing = true
+        latencies = [:]
+        let resolvers = store.allResolvers
+        await withTaskGroup(of: (String, TimeInterval?).self) { group in
+            for resolver in resolvers {
+                group.addTask { (resolver.selectionKey, await LatencyProbe.measure(resolver)) }
+            }
+            for await (key, value) in group {
+                withAnimation { latencies[key] = .some(value) }
             }
         }
+        probing = false
+        Theme.success()
     }
 }
 
